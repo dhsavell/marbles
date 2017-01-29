@@ -106,6 +106,43 @@ module Marbles
       return builtnum.to_i
     end
 
+    def next_expression
+      first = next_number
+      current = ' '
+
+      while current.ascii_whitespace?
+        break if @nav.done
+        current = @nav.down.as Char
+      end
+
+      op = @nav.down.as Char
+      second = next_number
+
+      case op
+      when 'G'
+        return first > second
+      when 'L'
+        return first < second
+      when 'N'
+        return first != second
+      when 'E'
+        return first == second
+      end
+
+      return false
+    end
+
+    def next_input
+      value = " "
+
+      until value.to_i?
+        value = gets.as String
+        value = value.chomp
+      end
+
+      return value.to_i
+    end
+
     def handle(command : Char)
       case command
       when '\\'
@@ -136,6 +173,32 @@ module Marbles
         @values[next_var] = @marble
       when 'R' # Return
         exit next_number
+      when '^' # Conditional
+        value = next_expression
+        if value
+          @nav.right
+        else
+          @nav.left
+        end
+      when '?'
+        nv = next_var
+        @values[nv] = Random.rand next_number
+      when 'I'
+        @values[next_var] = next_input
+      when '%'
+        target = next_number
+        pos = @nav.position
+        if (@nav.find '%').size > 0
+          (@nav.find '%').each do |coords|
+            puts coords
+            @nav.goto coords
+            val = next_number
+            puts val
+            break if val == target
+          end
+        else
+          @nav.goto pos
+        end
       end
     end
   end
