@@ -8,8 +8,6 @@ module Marbles
     def initialize(lines : Array(String))
       @nav = Navigator.new lines
       @values = {} of Char => Int32
-      @in_quote = false
-      @string = ""
       @marble = 0
     end
 
@@ -27,6 +25,48 @@ module Marbles
           handle current
         end
       end
+    end
+
+    def next_var
+      current = ' '
+      while current.ascii_whitespace?
+        break if @nav.done
+        current = @nav.down.as Char
+        if current == '\\'
+          @nav.right
+          next
+        elsif current == '/'
+          @nav.left
+          next
+        end
+      end
+
+      if current.lowercase?
+        return current
+      else
+        STDERR.puts "Variable name must be lowercase."
+        exit -1
+      end
+    end
+
+    def next_string
+      builtstr = ""
+      current = ' '
+
+      until current == '"'
+        break if @nav.done
+        current = @nav.down.as Char
+      end
+
+      loop do
+        break if @nav.done
+        current = @nav.down.as Char
+        break if current == '"'
+        builtstr += current
+      end
+
+      @nav.up
+      return builtstr
     end
 
     def next_number
@@ -48,7 +88,7 @@ module Marbles
 
 
         if !current.to_i? && builtnum == "" && @values.has_key? current
-          builtnum = @values[current].as Int32
+          builtnum = "#{@values[current]}"
           break
         end
 
@@ -77,17 +117,24 @@ module Marbles
           STDERR.puts "Redirected into a wall! #{@nav.position}"
           exit -1
         end
-      when '+'
+      when '+' # Add
         @marble += next_number
-      when '-'
+      when '-' # Subtract
         @marble -= next_number
-      when 'P'
-        puts "unimplemented"
-      when 'M'
+      when 'P' # Print
+        puts next_string
+      when 'M' # print Marble
         puts @marble
-      when 'C'
+      when 'C' # marble to Character
         puts @marble.chr
-      when 'R'
+      when 'A' # Assign
+        @values[next_var] = next_number
+      when 'L' # Load
+        nv = next_var
+        @marble = (@values.has_key? nv) ? @values[nv] : 0
+      when 'S' # Save marble into variable
+        @values[next_var] = @marble
+      when 'R' # Return
         exit next_number
       end
     end
