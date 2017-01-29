@@ -42,7 +42,7 @@ module Marbles
     def up
       if @y - 1 >= 0
         @y -= 1
-        return @lines[@y][@x]
+        return @x >= @lines[@y].size ? ' ' : @lines[@y][@x]
       end
 
       return nil
@@ -51,7 +51,7 @@ module Marbles
     def down
       if @y + 1 < @lines.size
         @y += 1
-        return @lines[@y][@x]
+        return @x >= @lines[@y].size ? ' ' : @lines[@y][@x]
       end
 
       return nil
@@ -72,7 +72,7 @@ module Marbles
 
     def right
       @x += 1
-      return @x > @lines[@y].size - 1 ? ' ' : @lines[@y][@x]
+      return @x >= @lines[@y].size ? ' ' : @lines[@y][@x]
     end
   end
 end

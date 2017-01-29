@@ -7,7 +7,7 @@ module Marbles
   class Interpreter
     def initialize(lines : Array(String))
       @nav = Navigator.new lines
-      @values = {} of Char => (String | Int32)
+      @values = {} of Char => Int32
       @in_quote = false
       @string = ""
       @marble = 0
@@ -15,10 +15,11 @@ module Marbles
 
     def run
       unless (@nav.find 'V').size == 1
-        STDERR.puts "Program does not a single entry point."
+        STDERR.puts "Program does not have a single entry point."
+        exit -1
       end
       start = (@nav.find 'V')[0]
-      @nav.goto start[0], start[1]
+      @nav.goto start
 
       until @nav.done
         current = @nav.down.as Char
@@ -36,6 +37,15 @@ module Marbles
         break if @nav.done
         current = @nav.down.as Char
         next if current.ascii_whitespace?
+
+        if current == '\\'
+          @nav.right
+          next
+        elsif current == '/'
+          @nav.left
+          next
+        end
+
 
         if !current.to_i? && builtnum == "" && @values.has_key? current
           builtnum = @values[current].as Int32
@@ -56,10 +66,6 @@ module Marbles
       return builtnum.to_i
     end
 
-    def next_string
-      return ""
-    end
-
     def handle(command : Char)
       case command
       when '\\'
@@ -68,7 +74,7 @@ module Marbles
         begin
           @nav.left
         rescue
-          STDERR.puts "Redirected into a wall!"
+          STDERR.puts "Redirected into a wall! #{@nav.position}"
           exit -1
         end
       when '+'
@@ -76,9 +82,11 @@ module Marbles
       when '-'
         @marble -= next_number
       when 'P'
-        puts next_string
+        puts "unimplemented"
       when 'M'
         puts @marble
+      when 'C'
+        puts @marble.chr
       when 'R'
         exit next_number
       end

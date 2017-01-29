@@ -1,15 +1,9 @@
 require "./marbles/*"
 
 module Marbles
-  prg = Interpreter.new(%w{V
-
-                           +
-                           6
-                           +
-                           4
-                           M
-
-                           R
-                           0})
-  prg.run
+  if ARGV.size > 0
+    if File.readable? ARGV[0]
+      Interpreter.new(File.read_lines ARGV[0]).run
+    end
+  end
 end
