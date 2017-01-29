@@ -1,0 +1,13 @@
+name: marbles
+version: 0.1.0
+
+authors:
+  - Joseph S. <dhsavell05@gmail.com>
+
+targets:
+  marbles:
+    main: src/marbles.cr
+
+crystal: 0.20.3
+
+license: MIT
